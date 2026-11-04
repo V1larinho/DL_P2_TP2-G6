@@ -189,9 +189,9 @@ Tabela 3 (calibração) em [`paper/tabelas/`](paper/tabelas/); figura em
 | 22/10 | PL06 — repositório, tabela 2.1, guia de segmentação, app v0 | **concluído** |
 | 27/10 | Dados medidos, embeddings DINOv2, teto, 18 corridas de AL, avaliação com IC, app de anotação | **concluído** — ver [`docs/RESULTADOS.md`](docs/RESULTADOS.md) |
 | 29/10 | **P2-D1** — proposta oficial (2 páginas no Moodle + pitch de 5 min) | **concluído** — ver [`docs/P2-D1.pdf`](docs/P2-D1.pdf) |
-| 05/11 | PL08 — `src/dados.py`, baseline, planeamento do seminário | **concluído** — ver [`paper/resultados.csv`](paper/resultados.csv) |
-| 15/11 | Ficha-resumo de 1 página (Moodle) | **concluído** — ver [`seminario/FICHA_RESUMO_SEMINARIO.pdf`](seminario/FICHA_RESUMO_SEMINARIO.pdf) |
-| 17/11 | **P2-D2** — Seminário I (Temas A, B, C), 25 min + 5 min | **em preparação** — ver [`seminario/plano_seminario.md`](seminario/plano_seminario.md) |
+| 05/11 | PL08 — `src/dados.py`, baseline, planeamento do seminário | **em curso** |
+| 15/11 | Ficha-resumo de 1 página (Moodle) | **a ser feito** (em preparação) |
+| 17/11 | **P2-D2** — Seminário I (Temas A, B, C), 25 min + 5 min | **a ser feito** (em preparação) |
 | 03/12 | **P2-D3** — protótipo/aplicação (tag `v1-D3`) | planeado |
 | 17/12 | **P2-D4** — avaliação final, Tabelas 1–3 | planeado |
 | 04/01 | Relatório + repositório + `AI_LOG.md` | planeado |
