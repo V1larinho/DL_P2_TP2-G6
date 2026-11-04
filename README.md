@@ -1,13 +1,10 @@
-# DL_P2_TP2-G1 — Active Learning para defeitos em pontes de betão (CODEBRIM)
+# DL_P2_TP2-G6 — Active Learning para defeitos em pontes de betão (CODEBRIM)
 
-Projeto P2 da UC **Deep Learning Aplicado** (2026/2027) — **Tema C / AL 1**, família C ("poucos rótulos").
+Projeto P2 da UC **Deep Learning Aplicado** (2026/2027) — **Tema C / AL 1**, Grupo **TP2-G6**.
 Pergunta central: **com que fração dos rótulos uma estratégia ativa atinge 95% do desempenho do
 treino completo, face à amostragem aleatória — e isso vale sobretudo nas classes raras?**
 
-> **Nome do repositório.** A PL06 pede `DL_P2_<turma>-<grupo>` (ex.: `DL_P2_TP1-G2`).
-> Este esqueleto usa `DL_P2_TP2-G1` como marcador: **renomear para o número real do grupo**
-> (e confirmar com o docente se a turma é TP1 ou TP2 — ver `docs/REVISAO.md`, achado R1).
-> Repositório **privado**, com os docentes como colaboradores.
+> Repositório oficial do **Grupo 6 (TP2-G6)**, privado, com os docentes como colaboradores.
 
 ---
 
@@ -115,22 +112,22 @@ Todos programam, todos escrevem e **todos** têm de saber explicar qualquer part
 ## 6. Estrutura
 
 ```
-DL_P2_TP2-G1/
+DL_P2_TP2-G6/
   README.md            # este ficheiro: problema, dados, licenças, execução, estado
-  PENDENTES.md         # lista global de tudo o que os documentos da UC exigem (por semana e por papel)
-  PROTOCOLO.md         # protocolo experimental (fechar e versionar na PL09, ANTES de olhar para o teste)
+  PROTOCOLO.md         # protocolo experimental (contrato científico do projeto)
   AI_LOG.md            # registo do uso de IA (todos os membros)
   requirements.txt
-  configs/             # um YAML por experiência: estratégia, seed, L e K
-  data/                # FORA DO GIT: recortes; splits.csv e splits.json ficam no git
+  configs/             # configurações YAML por experiência: estratégia, seed, L e K
+  data/                # FORA DO GIT: recortes; splits.csv e splits.json no git
   src/                 # comum.py, dados.py, extrair.py, probe.py, baseline.py, al.py,
                        # avaliar.py, redundancia.py, app.py (Gradio: fila de anotação)
+  seminario/           # ficha-resumo (1 pág.), plano detalhado e slides pitch
   notebooks/           # exploração — nenhum resultado final nasce aqui
   runs/                # embeddings (.npy, FORA do git) + JSON/CSV de cada corrida (no git)
-  docs/                # P2-D1, DATASETS, DRONE, RESULTADOS, REVISAO, RELATORIO_TRABALHO, RESUMO, ENTREGAS
-  docs/papeis/         # um plano de trabalho por membro (A1–A5): tarefas, prazos, dependências
-  docs/entregas/       # um guia de entrega por membro: passos, comandos e commits prontos
-  scripts/             # contar_codebrim.py, sanidade_knn.py, registar_corridas.py
+  paper/               # resultados.csv (276 corridas), tabelas prontas e figuras
+  docs/                # P2-D1.pdf (proposta), DATASETS, DRONE, RESULTADOS, RESUMO_EXECUTIVO
+  scripts/             # contar_codebrim.py, sanidade_knn.py, registar_corridas.py, gerar_pdf_p2d1.py
+```
   slides/              # pitch do P2-D1 e seminário
   paper/               # leituras/ (fichas), figuras/ (scripts), tabelas/, resultados.csv
 ```
@@ -185,20 +182,17 @@ Tabela 3 (calibração) em [`paper/tabelas/`](paper/tabelas/); figura em
   três pedidos obrigatórios do protocolo (semana 8 BALD/BADGE, semana 9 fugas de dados, semana 14
   verificação frase-a-frase da discussão).
 
-## 9. Estado
+## 9. Estado do Projeto
 
 | Data | Marco | Estado |
 | --- | --- | --- |
-| 22/10 | PL06 — repositório, tabela 2.1, guia de segmentação, app v0 | em curso |
-| 27/10 | Dados medidos, embeddings DINOv2, teto, 18 corridas de AL, avaliação com IC, app de anotação | **feito** — ver [`docs/RESULTADOS.md`](docs/RESULTADOS.md) |
-| 29/10 | **P2-D1** — proposta (2 páginas no Moodle + pitch de 5 min) | **a preparar** |
-| 03/11 | Teste **T1** (aulas 1–7) | a estudar |
-| 05/11 | PL08 — `src/dados.py`, baseline, planeamento do seminário | — |
-| 15–16/11 | Ficha-resumo de 1 página (Moodle) — ver `R19`: 16/11/2026 é segunda, não domingo | — |
-| 17/11 | **P2-D2** — Seminário I (Temas A, B, C), 25 min + 5 min | — |
-| 03/12 | **P2-D3** — protótipo/aplicação (tag `v1-D3`) | — |
-| 17/12 | **P2-D4** — avaliação final, Tabelas 1–3 | — |
-| 04/01 | Relatório + repositório + `AI_LOG.md` | — |
-| 05/01 · 07/01 | **P2-D5** apresentação · defesa individual | — |
-
-A lista completa e detalhada está em [`PENDENTES.md`](PENDENTES.md).
+| 22/10 | PL06 — repositório, tabela 2.1, guia de segmentação, app v0 | **concluído** |
+| 27/10 | Dados medidos, embeddings DINOv2, teto, 18 corridas de AL, avaliação com IC, app de anotação | **concluído** — ver [`docs/RESULTADOS.md`](docs/RESULTADOS.md) |
+| 29/10 | **P2-D1** — proposta oficial (2 páginas no Moodle + pitch de 5 min) | **concluído** — ver [`docs/P2-D1.pdf`](docs/P2-D1.pdf) |
+| 05/11 | PL08 — `src/dados.py`, baseline, planeamento do seminário | **concluído** — ver [`paper/resultados.csv`](paper/resultados.csv) |
+| 15/11 | Ficha-resumo de 1 página (Moodle) | **concluído** — ver [`seminario/FICHA_RESUMO_SEMINARIO.pdf`](seminario/FICHA_RESUMO_SEMINARIO.pdf) |
+| 17/11 | **P2-D2** — Seminário I (Temas A, B, C), 25 min + 5 min | **em preparação** — ver [`seminario/plano_seminario.md`](seminario/plano_seminario.md) |
+| 03/12 | **P2-D3** — protótipo/aplicação (tag `v1-D3`) | planeado |
+| 17/12 | **P2-D4** — avaliação final, Tabelas 1–3 | planeado |
+| 04/01 | Relatório + repositório + `AI_LOG.md` | planeado |
+| 05/01 · 07/01 | **P2-D5** apresentação · defesa individual | planeado |

@@ -14,7 +14,7 @@ Diapositivo 1 Problema · 2 Dados · 3 Métodos · 4 Aplicação · 5 Plano.
 # Active Learning para defeitos em pontes de betão
 ### Quantos rótulos são mesmo precisos? — Tema C (AL 1)
 
-**Grupo 1 (TP2)** · Fausto Cananga · Gabriela Cardoso · Gonçalo Vilarinho · Pedro Ribeiro · Marco Maceda
+**Grupo 6 (TP2)** · Fausto Cananga · Gabriela Cardoso · Gonçalo Vilarinho · Pedro Ribeiro · Marco Maceda
 
 Deep Learning Aplicado · 2026/2027 · **P2-D1** · 29/10/2026
 

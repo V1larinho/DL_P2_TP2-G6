@@ -54,7 +54,7 @@ header_html = """
     <div class="header-meta">
       <span class="meta-pill"><strong>Tema C (AL 1):</strong> Família C — Poucos Rótulos</span>
       <span class="meta-pill"><strong>Turno:</strong> TP2</span>
-      <span class="meta-pill"><strong>Grupo:</strong> 1</span>
+      <span class="meta-pill"><strong>Grupo:</strong> 6</span>
       <span class="meta-pill"><strong>Data:</strong> 29 de Outubro de 2026</span>
     </div>
   </div>
@@ -717,7 +717,7 @@ with sync_playwright() as p:
 
     footer_tmpl = """
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 6.2pt; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 0.72cm; color: #64748b; border-top: 0.5px solid #cbd5e1; padding-top: 2.5px;">
-      <span><strong>MEI/MEB/MECD/MMC</strong> · Deep Learning Aplicado (2026/2027) · TP2 — Grupo 1 (Tema C: Active Learning)</span>
+      <span><strong>MEI/MEB/MECD/MMC</strong> · Deep Learning Aplicado (2026/2027) · TP2 — Grupo 6 (Tema C: Active Learning)</span>
       <span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span>
     </div>
     """
