@@ -79,7 +79,7 @@ def gerar_fila(n: int = 40, seed: int = 0, estrategia: str = "entropia") -> Path
     return FILA
 
 
-def servir(revelar: bool = False, anotador: str = "anon"):
+def servir(revelar: bool = False, anotador: str = "anon", share: bool = False):
     """Interface gráfica em Gradio: recorte, caixas de seleção em português, gravar e cronómetro."""
     try:
         import gradio as gr
@@ -143,7 +143,7 @@ def servir(revelar: bool = False, anotador: str = "anon"):
         b_ver.click(lambda: carregar(), outputs=[img] + caixas + [nota])
         b_grav.click(gravar, inputs=caixas, outputs=[nota]).then(carregar, outputs=[img] + caixas + [nota])
         app.load(carregar, outputs=[img] + caixas + [nota])
-    app.launch()
+    app.launch(share=share)
     return 0
 
 
@@ -177,6 +177,7 @@ if __name__ == "__main__":
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--estrategia", default="entropia", choices=["entropia", "margem"])
     ap.add_argument("--servir", action="store_true")
+    ap.add_argument("--share", action="store_true", help="cria link público partilhável do Gradio")
     ap.add_argument("--revelar", action="store_true", help="mostra a sugestao do modelo (condicao de teste de ancoragem)")
     ap.add_argument("--anotador", default="anon")
     ap.add_argument("--resumo", action="store_true")
@@ -184,8 +185,9 @@ if __name__ == "__main__":
     if a.fila:
         gerar_fila(a.fila, a.seed, a.estrategia)
     elif a.servir:
-        servir(a.revelar, a.anotador)
+        servir(a.revelar, a.anotador, a.share)
     elif a.resumo:
         resumo()
     else:
-        ap.print_help()
+        # Por omissão se for corrido diretamente, inicia a app
+        servir(a.revelar, a.anotador, a.share)
