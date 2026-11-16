@@ -66,10 +66,13 @@ troca de dataset** (é o único multi-rótulo, desbalanceado e obrigatório pelo
 
 ## 3. Método
 
-- **Extrator congelado:** DINOv2 `ViT-S/14` (e `ViT-B/14` na confirmação), embeddings **CLS normalizados**.
-  Torna cada ronda barata e permite repetir com 3 seeds.
-- **Classificador:** cabeça linear/MLP sobre as características congeladas (cabeça principal) e
-  `ResNet-50` ImageNet afinada (confirmação).
+- **Três backbones, as mesmas estratégias nos três** (Emenda 1 do [`PROTOCOLO.md`](PROTOCOLO.md)):
+  - **CNN** — EfficientNet-B0 (ImageNet-1k), *fine-tune* completo, re-treinada do pré-treino em cada ronda;
+  - **Transformer** — ViT-S/16 (ImageNet-21k→1k), *fine-tune* completo, idem;
+  - **DINOv2** `ViT-S/14` **congelado** (embeddings CLS normalizados) + cabeça linear — apresentado **no fim**,
+    como a referência "muito eficiente".
+- **Classificador:** a mesma cabeça linear (`probe.Cabeca`, BCE por classe) nos três; no *fine-tune* as
+  estratégias veem as características penúltimas h(x) do modelo afinado, por isso o código de aquisição é o mesmo.
 - **Três coisas que não se confundem** (ver `docs/REVISAO.md` R2): *baseline do projeto* (PL08 §2.3) =
   CNN pré-treinada (EfficientNet) afinada a **100% dos rótulos**; *teto* = esse regime com a cabeça
   principal; *baseline do AL* = a **aleatória** com o mesmo orçamento — é a única comparação justa.
@@ -81,8 +84,8 @@ troca de dataset** (é o único multi-rótulo, desbalanceado e obrigatório pelo
 - **Transversal (família D):** ECE do modelo ativo vs aleatório, composição do conjunto rotulado por
   ronda, Grad-CAM nos recortes adquiridos.
 
-Parâmetros do protocolo: `L = 5%` do pool (estratificado, 3 seeds), `K = 2,5%` por ronda,
-orçamento total `40%` do pool → **14 rondas**, hiperparâmetros congelados após seleção na validação
+Parâmetros do protocolo: `L = 5%` **por classe** (cada classe recebe ≥ 5% dos seus positivos; 3 seeds),
+`K = 2,5%` por ronda, orçamento total `40%` do pool → **14 rondas**, 3 backbones × 6 estratégias × 3 seeds = **54 corridas**, hiperparâmetros congelados após seleção na validação
 com a estratégia aleatória, re-treino de raiz em cada ronda. Detalhe em [`PROTOCOLO.md`](PROTOCOLO.md).
 
 ## 4. Aplicação — assistente de anotação
@@ -119,17 +122,16 @@ DL_P2_TP2-G6/
   requirements.txt
   configs/             # configurações YAML por experiência: estratégia, seed, L e K
   data/                # FORA DO GIT: recortes; splits.csv e splits.json no git
-  src/                 # comum.py, dados.py, extrair.py, probe.py, baseline.py, al.py,
-                       # avaliar.py, redundancia.py, app.py (Gradio: fila de anotação)
+  src/                 # comum.py, dados.py, extrair.py, probe.py, baseline.py, al.py (DINOv2),
+                       # backbones.py + al_ft.py (CNN/ViT com fine-tune), avaliar.py,
+                       # redundancia.py, app.py (Gradio: fila de anotação)
   seminario/           # ficha-resumo (1 pág.), plano detalhado e slides pitch
   notebooks/           # exploração — nenhum resultado final nasce aqui
   runs/                # embeddings (.npy, FORA do git) + JSON/CSV de cada corrida (no git)
   paper/               # resultados.csv (276 corridas), tabelas prontas e figuras
   docs/                # P2-D1.pdf (proposta), DATASETS, DRONE, RESULTADOS, RESUMO_EXECUTIVO
-  scripts/             # contar_codebrim.py, sanidade_knn.py, registar_corridas.py, gerar_pdf_p2d1.py
-```
-  slides/              # pitch do P2-D1 e seminário
-  paper/               # leituras/ (fichas), figuras/ (scripts), tabelas/, resultados.csv
+  scripts/             # contar_codebrim.py, sanidade_knn.py, registar_corridas.py, gerar_pdf_p2d1.py,
+                       # afinar_ft.py (hiperparâmetros do fine-tune), comparar_backbones.py
 ```
 
 ## 7. Como executar
@@ -142,9 +144,8 @@ python src/dados.py --determinismo             # mesmo 1.º lote com a mesma see
 python src/extrair.py --modelo dinov2_vits14   # 7 677 × 384, 475 s em CPU, retomável
 python scripts/sanidade_knn.py                 # sanidade do extrator: k-NN 0,7000 (acaso 0,2551)
 python src/baseline.py --experiencia ambos     # teto (100%) e L-só (5%)
-python src/al.py --seeds 0 1 2 --saida runs/al_porclasse
-python scripts/comparar_backbones.py   # tabelas + figura dos 3 backbones                 # 6 estratégias × 15 pontos = 18 corridas
-python src/avaliar.py --B 400                  # Tabelas 1–3 + figura com IC
+python src/al.py --seeds 0 1 2 --saida runs/al_porclasse   # DINOv2: 6 estratégias × 3 seeds
+python src/avaliar.py --B 400                  # Tabelas 1–3 + figura com IC (um backbone; ver --raiz)
 python scripts/registar_corridas.py            # reconstrói as linhas de AL no resultados.csv
 python src/redundancia.py                      # τ de quase-duplicados (eixo drone)
 python src/app.py --fila 40                    # fila de anotação por incerteza
@@ -157,21 +158,37 @@ Cada corrida demora ~2,5 min por estratégia em CPU (20 núcleos, 3 threads por 
 ### 7.2 Três backbones (Emenda 1 do PROTOCOLO)
 
 CNN e Transformer com *fine-tune* em cada ronda (`src/al_ft.py`); DINOv2 congelado continua em `src/al.py`.
-Requer **GPU** (torch com CUDA — numa RTX 50xx: `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128`).
+Requer **GPU** (torch com CUDA — numa RTX 50xx: `pip install --force-reinstall --no-deps "torch==2.14.1+cu130" torchvision --index-url https://download.pytorch.org/whl/cu130`).
 
 ```bash
 python src/al_ft.py --backbone cnn --rapido                # teste de fumo (~3 min em CPU)
-python src/al_ft.py --backbone cnn --teto --seeds 0 1 2    # teto 100% por backbone
+python scripts/afinar_ft.py --backbone cnn                 # hiperparâmetros (só validação)
+python src/al_ft.py --backbone cnn --teto --seeds 0 1 2    # teto 100% por backbone (~4 min cada)
 python src/al_ft.py --backbone vit --teto --seeds 0 1 2
-python src/al_ft.py --backbone cnn --seeds 0 1 2           # 6 estratégias × 15 rondas
-python src/al_ft.py --backbone vit --seeds 0 1 2
-python src/al.py --seeds 0 1 2                             # DINOv2 congelado, L por classe
+python src/al_ft.py --backbone cnn --seeds 0 1 2           # 18 corridas, ~5,7 h numa RTX 5060
+python src/al_ft.py --backbone vit --seeds 0 1 2           # 18 corridas, ~3,9 h
+python src/al.py --seeds 0 1 2 --saida runs/al_porclasse   # DINOv2 congelado, L por classe (~21 min)
+python scripts/comparar_backbones.py                       # tabelas + figura dos 3 backbones
 ```
 
 Saídas: `runs/al_ft/<backbone>/<estrategia>/seed<s>/` (mesmo formato que `runs/al/`) e `runs/baseline_ft/<backbone>/`.
 A 1.ª execução cria `runs/cache_img224.npy` (≈1,1 GB, fora do git).
 
-## 7.1 Resultados das primeiras corridas
+## 7.3 Resultados finais — 3 backbones (16/11/2026)
+
+Macro-F1 no teste, média de 3 seeds; IC 95% por bootstrap cruzado (imagens × seeds), B=400.
+
+| Backbone | Teto (100%) | Aleatória a 40% | Melhor AL a 40% | Rótulos p/ 95% do teto (aleatória → melhor AL) | Estratégias que batem a aleatória |
+| --- | --- | --- | --- | --- | --- |
+| CNN — EfficientNet-B0 (fine-tune) | 0,866 | 0,849 | 0,872 | 18% → 12% | **5/5** (ΔALC +0,018 a +0,021) |
+| Transformer — ViT-S/16 (fine-tune) | 0,888 | 0,871 | 0,894 | 14% → 10% | **5/5** (ΔALC +0,010 a +0,017) |
+| DINOv2 ViT-S/14 (congelado) | 0,831 | 0,813 | 0,831 | 15% → 11% | **3/5** (BALD, entropia, margem) |
+
+Tabela completa em [`paper/tabelas/comparacao_backbones.md`](paper/tabelas/comparacao_backbones.md),
+figura em [`paper/figuras/curvas_3_backbones.png`](paper/figuras/curvas_3_backbones.png), tabelas por backbone em
+`paper/tabelas/{cnn,vit,dino}/` e leitura em [`docs/RESULTADOS.md`](docs/RESULTADOS.md).
+
+## 7.1 (Histórico) Resultados das primeiras corridas — 27/10, só DINOv2
 
 Capacidade de referência: cabeça linear sobre DINOv2 ViT-S/14 congelado, 7 677 recortes.
 
@@ -208,7 +225,8 @@ Tabela 3 (calibração) em [`paper/tabelas/`](paper/tabelas/); figura em
 | 27/10 | Dados medidos, embeddings DINOv2, teto, 18 corridas de AL, avaliação com IC, app de anotação | **concluído** — ver [`docs/RESULTADOS.md`](docs/RESULTADOS.md) |
 | 29/10 | **P2-D1** — proposta oficial (2 páginas no Moodle + pitch de 5 min) | **concluído** — ver [`docs/P2-D1.pdf`](docs/P2-D1.pdf) |
 | 05/11 | PL08 — `src/dados.py`, baseline, planeamento do seminário | **em curso** |
-| 15/11 | Ficha-resumo de 1 página (Moodle) | **a ser feito** (em preparação) |
+| 12–16/11 | **Emenda 1** — CNN, ViT e DINOv2 com as mesmas 6 estratégias, L 5% por classe, 54 corridas na GPU | **concluído** — ver [`docs/RESUMO_ALTERACOES.md`](docs/RESUMO_ALTERACOES.md) |
+| 15/11 | Ficha-resumo de 1 página (Moodle) | **atualizada** com os 3 backbones |
 | 17/11 | **P2-D2** — Seminário I (Temas A, B, C), 25 min + 5 min | **a ser feito** (em preparação) |
 | 03/12 | **P2-D3** — protótipo/aplicação (tag `v1-D3`) | planeado |
 | 17/12 | **P2-D4** — avaliação final, Tabelas 1–3 | planeado |
