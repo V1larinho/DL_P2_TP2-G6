@@ -1,4 +1,38 @@
-# Resultados das primeiras corridas — o que foi feito, por pessoa
+# Resultados finais — Emenda 1 (3 backbones × 6 estratégias × 3 seeds)
+
+Corrido de 15/11 22:35 a 16/11 08:51 na GPU (RTX 5060 Laptop, torch 2.14.1+cu130).
+54 corridas, 15 pontos cada (5% → 40% do pool), L inicial = 5% **por classe**.
+Bootstrap cruzado (imagens × seeds), B=400, IC 95% percentil. Tudo executado; nada estimado.
+
+```bash
+python src/al_ft.py --backbone cnn --teto --seeds 0 1 2
+python src/al_ft.py --backbone vit --teto --seeds 0 1 2
+python src/al_ft.py --backbone cnn --seeds 0 1 2       # ~5,7 h
+python src/al_ft.py --backbone vit --seeds 0 1 2       # ~3,9 h
+python src/al.py --seeds 0 1 2 --saida runs/al_porclasse   # DINOv2, ~21 min
+python scripts/comparar_backbones.py                   # tabelas + figura
+```
+
+| Backbone | Teto F1 | F1 a 40% aleatória | Melhor F1 a 40% | Rótulos p/ 95% do teto (aleatória → melhor AL) | ΔALC vs aleatória (significativas) |
+| --- | --- | --- | --- | --- | --- |
+| CNN — EfficientNet-B0, fine-tune | 0,866 | 0,849 | 0,872 (CoreSet) | 18,3% → 11,5% (BADGE) | **5/5**: +0,018 a +0,021 |
+| Transformer — ViT-S/16, fine-tune | 0,888 | 0,871 | 0,894 (CoreSet) | 13,8% → 10,4% (CoreSet/BALD) | **5/5**: +0,010 a +0,017 |
+| DINOv2 ViT-S/14 congelado (no fim) | 0,831 | 0,813 | 0,831 (BALD) | 14,9% → 10,7% (entropia/margem) | **3/5**: BALD +0,018, entropia +0,015, margem +0,015; BADGE e CoreSet com IC a incluir 0 |
+
+Tabela completa: `paper/tabelas/comparacao_backbones.md`. Figura: `paper/figuras/curvas_3_backbones.png`.
+Por backbone: `paper/tabelas/{cnn,vit,dino}/` (Tabela 1, diferenças emparelhadas com F1 por classe, ECE).
+
+**Leitura.**
+1. **H1 confirmada nos 3 backbones**: há sempre estratégias que batem a aleatória com IC que exclui 0.
+2. **Fine-tune dá curvas mais inclinadas** (0,75 → 0,87–0,89) do que o DINOv2 congelado (0,75 → 0,83) — o problema "muito eficiente" levantado pelo professor.
+3. **O CoreSet muda de sinal com o backbone**: é dos melhores com fine-tune (as características mudam em cada ronda) e não bate a aleatória com embeddings DINOv2 fixos, como já acontecia na 1.ª ronda de resultados (abaixo).
+4. **Classe rara (eflorescência)**: na CNN o ganho é significativo para CoreSet (+0,072), BALD (+0,061) e BADGE (+0,056); no ViT e no DINOv2 é positivo mas com IC a incluir 0 (H2 parcial).
+5. Limitações: 3 seeds (IC das seeds aproximado); hiperparâmetros afinados numa só seed e o melhor lr ficou no limite da grelha; o teto do DINOv2 é o de `runs/baseline` (a 100% dos rótulos o L inicial não interessa).
+
+---
+
+# (Histórico) Primeiras corridas — 27/10/2026, só DINOv2 congelado, L "classe mais rara"
+
 
 Corrido em 27/10/2026, CPU (20 núcleos lógicos, sem GPU), Python 3.11, torch 2.14.1+cpu,
 timm 1.0.30. Tudo o que está aqui saiu de execução real; nada é estimado.

@@ -1,0 +1,28 @@
+{
+  "estrategia": "bald",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "dedup_grupo": false,
+  "estratificacao": "por_classe",
+  "final": {
+    "estrategia": "bald",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8124,
+    "f1_teste": 0.8363,
+    "ece": 0.0416,
+    "n_candidatos": 3869,
+    "hash_rotulado": "072a6874a639fade",
+    "segundos": 6.1,
+    "f1_Background": 0.9,
+    "f1_CorrosionStain": 0.7795,
+    "f1_Crack": 0.8296,
+    "f1_Efflorescence": 0.7901,
+    "f1_ExposedBars": 0.8932,
+    "f1_Spallation": 0.8254
+  }
+}

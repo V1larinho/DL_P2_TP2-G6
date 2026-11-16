@@ -1,0 +1,28 @@
+{
+  "estrategia": "badge",
+  "seed": 2,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "dedup_grupo": false,
+  "estratificacao": "por_classe",
+  "final": {
+    "estrategia": "badge",
+    "seed": 2,
+    "ronda": 14,
+    "n_rotulos": 2566,
+    "fracao": 0.3986,
+    "f1_val": 0.8009,
+    "f1_teste": 0.8336,
+    "ece": 0.0394,
+    "n_candidatos": 3872,
+    "hash_rotulado": "cdfa113b96c9b831",
+    "segundos": 3.8,
+    "f1_Background": 0.897,
+    "f1_CorrosionStain": 0.7742,
+    "f1_Crack": 0.8387,
+    "f1_Efflorescence": 0.782,
+    "f1_ExposedBars": 0.8818,
+    "f1_Spallation": 0.828
+  }
+}

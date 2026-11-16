@@ -1,0 +1,28 @@
+{
+  "estrategia": "entropia",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "dedup_grupo": false,
+  "estratificacao": "por_classe",
+  "final": {
+    "estrategia": "entropia",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8048,
+    "f1_teste": 0.8342,
+    "ece": 0.0396,
+    "n_candidatos": 3869,
+    "hash_rotulado": "9a309aee14fac949",
+    "segundos": 3.8,
+    "f1_Background": 0.901,
+    "f1_CorrosionStain": 0.7645,
+    "f1_Crack": 0.8446,
+    "f1_Efflorescence": 0.8027,
+    "f1_ExposedBars": 0.8875,
+    "f1_Spallation": 0.805
+  }
+}

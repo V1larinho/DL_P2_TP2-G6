@@ -210,6 +210,45 @@ def selecionar_L(y: np.ndarray, fracao: float, seed: int) -> np.ndarray:
     return idx
 
 
+def selecionar_L_por_classe(y: np.ndarray, fracao: float, seed: int) -> np.ndarray:
+    """L inicial = `fracao` dos POSITIVOS de cada classe (pedido do docente, nov/2026).
+
+    Para cada classe c: sorteia ceil(fracao * n_pos_c) recortes entre os que tem c,
+    sem repor; a uniao das 6 escolhas e o L inicial. Diferente de `selecionar_L`:
+    um recorte com 3 defeitos conta para as 3 classes, e cada classe fica com
+    pelo menos `fracao` dos seus positivos. Consequencia declarada: |L| e variavel
+    (multi-rotulo + sobreposicao), proximo de `fracao * n`.
+    """
+    import math
+
+    rng = np.random.default_rng(seed)
+    escolhidos: set[int] = set()
+    for c in range(y.shape[1]):
+        pos = np.flatnonzero(y[:, c] > 0)
+        if len(pos) == 0:
+            continue
+        rng.shuffle(pos)
+        alvo = max(1, math.ceil(fracao * len(pos)))
+        # os que ja entraram por outra classe contam para esta (nao se duplica a quota)
+        ja = sum(1 for i in pos if int(i) in escolhidos)
+        for i in pos:
+            if ja >= alvo:
+                break
+            if int(i) not in escolhidos:
+                escolhidos.add(int(i))
+                ja += 1
+    return np.array(sorted(escolhidos), dtype=int)
+
+
+def escolher_L(y: np.ndarray, fracao: float, seed: int, modo: str = "por_classe") -> np.ndarray:
+    """`por_classe` (novo, por defeito) ou `raro` (regra antiga: classe positiva mais rara)."""
+    if modo == "por_classe":
+        return selecionar_L_por_classe(y, fracao, seed)
+    if modo == "raro":
+        return selecionar_L(y, fracao, seed)
+    raise ValueError(modo)
+
+
 # --------------------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------------------

@@ -1,0 +1,38 @@
+{
+  "backbone": "cnn",
+  "modelo_timm": "efficientnet_b0.ra_in1k",
+  "estrategia": "entropia",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "estratificacao": "por_classe",
+  "hiper": {
+    "epocas": 15,
+    "batch": 32,
+    "lr_cabeca": 0.001,
+    "wd": 0.0001,
+    "tamanho": 224
+  },
+  "rapido": false,
+  "final": {
+    "backbone": "cnn",
+    "estrategia": "entropia",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8657,
+    "f1_teste": 0.8714,
+    "ece": 0.047,
+    "n_candidatos": 3869,
+    "hash_rotulado": "457f4e1dbcce2307",
+    "segundos": 265.7,
+    "f1_Background": 0.9041,
+    "f1_CorrosionStain": 0.8107,
+    "f1_Crack": 0.8774,
+    "f1_Efflorescence": 0.8355,
+    "f1_ExposedBars": 0.9097,
+    "f1_Spallation": 0.8911
+  }
+}

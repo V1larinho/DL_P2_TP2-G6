@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comum as C  # noqa: E402
 import probe  # noqa: E402
 from baseline import HIPER, carregar_caracteristicas, ece_macro  # noqa: E402
-from dados import selecionar_L  # noqa: E402
+from dados import escolher_L  # noqa: E402
 
 ESTRATEGIAS = ["aleatoria", "entropia", "margem", "bald", "coreset", "badge"]
 
@@ -115,13 +115,14 @@ def corrida(
     rondas: int = 14,
     dedup_grupo: bool = False,
     raiz_saida: Path | None = None,
+    estratificacao: str = "por_classe",
 ) -> pd.DataFrame:
     pool = np.flatnonzero(df.split.values == "train")
     va = np.flatnonzero(df.split.values == "val")
     te = np.flatnonzero(df.split.values == "test")
     grupos = df.grupo.values
 
-    lab = pool[selecionar_L(Y[pool], fracao_L, seed)]
+    lab = pool[escolher_L(Y[pool], fracao_L, seed, estratificacao)]
     U = np.setdiff1d(pool, lab)
     K = int(round(fracao_K * len(pool)))
     assert not (set(lab.tolist()) & set(te.tolist())), "V1: teste dentro de L"
@@ -183,7 +184,7 @@ def corrida(
     res.to_csv(destino / "rondas.csv", index=False)
     C.escrever_json(
         {"estrategia": estrategia, "seed": seed, "rondas": rondas, "K": K,
-         "n_pool": int(len(pool)), "dedup_grupo": bool(dedup_grupo),
+         "n_pool": int(len(pool)), "dedup_grupo": bool(dedup_grupo), "estratificacao": estratificacao,
          "final": res.iloc[-1].to_dict()},
         destino / "meta.json",
     )
@@ -226,6 +227,8 @@ def main(argv=None) -> int:
     ap.add_argument("--K", type=float, default=0.025)
     ap.add_argument("--dedup-grupo", action="store_true", help="nao readquire outra crop da mesma imagem (regra drone)")
     ap.add_argument("--saida", default=None)
+    ap.add_argument("--estratificacao", choices=["por_classe", "raro"], default="por_classe",
+                    help="L inicial: 5%% dos positivos de cada classe (novo) ou classe mais rara (antigo)")
     a = ap.parse_args(argv)
 
     F, Y, df = carregar_caracteristicas()
@@ -236,7 +239,7 @@ def main(argv=None) -> int:
     t0 = time.time()
     for s in a.seeds:
         for e in a.estrategias:
-            corrida(e, s, F, Y, df, a.L, a.K, a.rondas, a.dedup_grupo, saida)
+            corrida(e, s, F, Y, df, a.L, a.K, a.rondas, a.dedup_grupo, saida, a.estratificacao)
     print(f"\ntotal {time.time() - t0:.0f}s")
     return 0
 

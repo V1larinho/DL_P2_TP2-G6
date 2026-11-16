@@ -1,0 +1,38 @@
+{
+  "backbone": "cnn",
+  "modelo_timm": "efficientnet_b0.ra_in1k",
+  "estrategia": "aleatoria",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "estratificacao": "por_classe",
+  "hiper": {
+    "epocas": 15,
+    "batch": 32,
+    "lr_cabeca": 0.001,
+    "wd": 0.0001,
+    "tamanho": 224
+  },
+  "rapido": false,
+  "final": {
+    "backbone": "cnn",
+    "estrategia": "aleatoria",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8454,
+    "f1_teste": 0.8625,
+    "ece": 0.0473,
+    "n_candidatos": 3869,
+    "hash_rotulado": "d186b21a324b3533",
+    "segundos": 110.3,
+    "f1_Background": 0.9028,
+    "f1_CorrosionStain": 0.8167,
+    "f1_Crack": 0.8571,
+    "f1_Efflorescence": 0.8155,
+    "f1_ExposedBars": 0.9205,
+    "f1_Spallation": 0.8621
+  }
+}

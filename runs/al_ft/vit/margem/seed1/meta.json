@@ -1,0 +1,38 @@
+{
+  "backbone": "vit",
+  "modelo_timm": "vit_small_patch16_224.augreg_in21k_ft_in1k",
+  "estrategia": "margem",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "estratificacao": "por_classe",
+  "hiper": {
+    "epocas": 15,
+    "batch": 32,
+    "lr_cabeca": 0.001,
+    "wd": 0.0001,
+    "tamanho": 224
+  },
+  "rapido": false,
+  "final": {
+    "backbone": "vit",
+    "estrategia": "margem",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8919,
+    "f1_teste": 0.8939,
+    "ece": 0.0388,
+    "n_candidatos": 3869,
+    "hash_rotulado": "7520da842ef4f791",
+    "segundos": 83.2,
+    "f1_Background": 0.9342,
+    "f1_CorrosionStain": 0.8571,
+    "f1_Crack": 0.8733,
+    "f1_Efflorescence": 0.8944,
+    "f1_ExposedBars": 0.9392,
+    "f1_Spallation": 0.8651
+  }
+}

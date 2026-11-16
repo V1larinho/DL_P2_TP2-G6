@@ -1,0 +1,38 @@
+{
+  "backbone": "cnn",
+  "modelo_timm": "efficientnet_b0.ra_in1k",
+  "estrategia": "margem",
+  "seed": 0,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "estratificacao": "por_classe",
+  "hiper": {
+    "epocas": 15,
+    "batch": 32,
+    "lr_cabeca": 0.001,
+    "wd": 0.0001,
+    "tamanho": 224
+  },
+  "rapido": false,
+  "final": {
+    "backbone": "cnn",
+    "estrategia": "margem",
+    "seed": 0,
+    "ronda": 14,
+    "n_rotulos": 2573,
+    "fracao": 0.3997,
+    "f1_val": 0.8743,
+    "f1_teste": 0.8644,
+    "ece": 0.0442,
+    "n_candidatos": 3865,
+    "hash_rotulado": "69896d1e83499ca2",
+    "segundos": 93.4,
+    "f1_Background": 0.9079,
+    "f1_CorrosionStain": 0.8036,
+    "f1_Crack": 0.8627,
+    "f1_Efflorescence": 0.8207,
+    "f1_ExposedBars": 0.915,
+    "f1_Spallation": 0.8763
+  }
+}

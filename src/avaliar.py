@@ -86,11 +86,12 @@ def rotulos_para(frac: np.ndarray, f1: np.ndarray, alvo: float) -> float:
     return float(f[i - 1] + t * (f[i] - f[i - 1]))
 
 
-def teto_por_seed(seeds) -> dict:
+def teto_por_seed(seeds, pasta: Path | None = None) -> dict:
     """F1 do teto (100% dos rotulos) por seed, se o baseline ja correu."""
     out = {}
+    pasta = pasta or (C.RUNS / "baseline")
     for s in seeds:
-        p = C.RUNS / "baseline" / f"teto_s{s}.json"
+        p = pasta / f"teto_s{s}.json"
         if p.exists():
             import json
 
@@ -169,15 +170,22 @@ def main(argv=None) -> int:
     ap.add_argument("--estrategias", nargs="+", default=None)
     ap.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
     ap.add_argument("--fracao-classe", type=float, default=0.20)
+    ap.add_argument("--raiz", default=None, help="pasta das corridas (omissao: runs/al)")
+    ap.add_argument("--teto", default=None, help="pasta com teto_s*.json (omissao: runs/baseline)")
+    ap.add_argument("--nome", default="", help="subpasta de saida em tabelas/ e figuras/ (ex.: cnn)")
+    ap.add_argument("--titulo", default="DINOv2 ViT-S/14 congelado")
     a = ap.parse_args(argv)
 
-    corridas, df = carregar(estrategias=a.estrategias, seeds=tuple(a.seeds))
+    raiz = Path(a.raiz) if a.raiz else None
+    corridas, df = carregar(raiz=raiz, estrategias=a.estrategias, seeds=tuple(a.seeds))
     if not corridas:
-        print("sem corridas em runs/al/ — corre primeiro `python src/al.py`")
+        print(f"sem corridas em {raiz or 'runs/al/'}")
         return 1
     grupos = grupos_teste(df, corridas)
     estrategias = sorted({e for e, _ in corridas})
-    teto = teto_por_seed(a.seeds)
+    teto = teto_por_seed(a.seeds, Path(a.teto) if a.teto else None)
+    TAB = C.PAPEL / "tabelas" / a.nome if a.nome else C.PAPEL / "tabelas"
+    FIG = C.PAPEL / "figuras" / a.nome if a.nome else C.PAPEL / "figuras"
     print(f"corridas: {len(corridas)}  estrategias: {estrategias}  grupos de teste: {len(np.unique(grupos))}")
     if not teto:
         print("AVISO: sem runs/baseline/teto_s*.json — a coluna 'rotulos para 95%' fica NaN")
@@ -214,13 +222,14 @@ def main(argv=None) -> int:
                 "F1_final_lo": flo,
                 "F1_final_hi": fhi,
                 "ALC_bruto": alc(f, m),
+                "ALC_norm": alcm / np.mean(list(teto.values())) if teto else np.nan,
             }
         )
     tab = pd.DataFrame(linhas).sort_values("ALC", ascending=False)
     C.garantir_dirs()
-    (C.PAPEL / "tabelas").mkdir(parents=True, exist_ok=True)
+    TAB.mkdir(parents=True, exist_ok=True); FIG.mkdir(parents=True, exist_ok=True)
 
-    with open(C.PAPEL / "tabelas" / "tabela1.md", "w", encoding="utf-8") as fh:
+    with open(TAB / "tabela1.md", "w", encoding="utf-8") as fh:
         fh.write("# Tabela 1 — ALC e rotulos necessarios para 95% do teto\n\n")
         fh.write(f"Bootstrap cruzado (imagens x seeds), B={B}. IC 95% percentil.\n\n")
         fh.write("| Estrategia | ALC | IC 95% | Rotulos p/ 95% do teto | IC 95% | Atingido | F1 final | IC 95% |\n")
@@ -233,7 +242,7 @@ def main(argv=None) -> int:
                 f"{100*r.rot95_atingido:.0f}% | {r.F1_final:.4f} | [{r.F1_final_lo:.4f}; {r.F1_final_hi:.4f}] |\n"
             )
         if teto:
-            fh.write(f"\nTeto (100% dos rotulos, cabeca linear): F1 = {np.mean(list(teto.values())):.4f} "
+            fh.write(f"\nTeto (100% dos rotulos): F1 = {np.mean(list(teto.values())):.4f} "
                      f"(seeds {list(teto)})\n")
     print("\n" + tab.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
     print(f"\nescrito {C.PAPEL / 'tabelas' / 'tabela1.md'}")
@@ -257,7 +266,7 @@ def main(argv=None) -> int:
                 linha[f"d_{c}_hi"] = dhi
             difs.append(linha)
         dd = pd.DataFrame(difs).sort_values("d_ALC", ascending=False)
-        with open(C.PAPEL / "tabelas" / "tabela2_diferencas.md", "w", encoding="utf-8") as fh:
+        with open(TAB / "tabela2_diferencas.md", "w", encoding="utf-8") as fh:
             fh.write("# Diferenca emparelhada vs aleatoria (mesmas imagens e seeds reamostradas)\n\n")
             fh.write(f"B={B}. IC 95% percentil da diferenca. **Negrito** = IC exclui 0.\n\n")
             fh.write("| Estrategia | d ALC | IC 95% | P(>0) | " + " | ".join(f"d {c}" for c in C.CLASSES) + " |\n")
@@ -288,7 +297,7 @@ def main(argv=None) -> int:
             pc.append(linha)
     pcd = pd.DataFrame(pc)
     med = pcd.groupby("estrategia")[C.CLASSES].mean().sort_index()
-    med.to_csv(C.PAPEL / "tabelas" / "tabela2_por_classe.csv")
+    med.to_csv(TAB / "tabela2_por_classe.csv")
     print(f"\nF1 por classe a ~{alvo_f:.0%} dos rotulos:\n{med.to_string(float_format=lambda v: f'{v:.3f}')}")
 
     # --- calibracao (H4 / Tabela 3) -------------------------------------------------
@@ -298,7 +307,7 @@ def main(argv=None) -> int:
         E = np.stack([corridas[(e, s)]["df"].ece.values for s in seeds_e])
         cal.append({"estrategia": e, "ece_inicial": np.nanmean(E[:, 0]), "ece_final": np.nanmean(E[:, -1])})
     cald = pd.DataFrame(cal).sort_values("ece_final")
-    with open(C.PAPEL / "tabelas" / "tabela3_calibracao.md", "w", encoding="utf-8") as fh:
+    with open(TAB / "tabela3_calibracao.md", "w", encoding="utf-8") as fh:
         fh.write("# Tabela 3 — calibracao (ECE marginal por classe, 10 bins)\n\n")
         fh.write("| Estrategia | ECE com 5% dos rotulos | ECE com 40% |\n| --- | --- | --- |\n")
         for _, r in cald.iterrows():
@@ -321,11 +330,11 @@ def main(argv=None) -> int:
             ax.axhline(np.mean(list(teto.values())), ls="--", c="k", lw=1, label="teto (100%)")
         ax.set_xlabel("rotulos usados (% do pool)")
         ax.set_ylabel("Macro-F1 no teste")
-        ax.set_title("Aprendizagem ativa — CODEBRIM, DINOv2 ViT-S/14 congelado")
+        ax.set_title(f"Aprendizagem ativa — CODEBRIM, {a.titulo}")
         ax.grid(alpha=0.25)
         ax.legend(fontsize=7, ncol=2)
         fig.tight_layout()
-        fig.savefig(C.PAPEL / "figuras" / "curva_al.png")
+        fig.savefig(FIG / "curva_al.png")
         print(f"figura: {C.PAPEL / 'figuras' / 'curva_al.png'}")
     except Exception as exc:  # figura nao pode derrubar a avaliacao
         print(f"aviso: figura nao gerada ({exc})")
@@ -335,11 +344,14 @@ def main(argv=None) -> int:
             "B": B,
             "seeds": list(a.seeds),
             "teto": teto,
+            "titulo": a.titulo,
+            "curvas": {e: {"fracao": curvas[e][0].tolist(), "f1": curvas[e][1].tolist(), "sd": curvas[e][2].tolist()} for e in estrategias},
+            "diferencas": dd.to_dict(orient="records") if "aleatoria" in bs and len(bs["aleatoria"]["alc"]) > 10 else [],
             "tabela1": tab.to_dict(orient="records"),
             "por_classe": med.to_dict(),
             "calibracao": cald.to_dict(orient="records"),
         },
-        C.PAPEL / "tabelas" / "resumo_avaliacao.json",
+        TAB / "resumo_avaliacao.json",
     )
     return 0
 

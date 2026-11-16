@@ -142,7 +142,8 @@ python src/dados.py --determinismo             # mesmo 1.º lote com a mesma see
 python src/extrair.py --modelo dinov2_vits14   # 7 677 × 384, 475 s em CPU, retomável
 python scripts/sanidade_knn.py                 # sanidade do extrator: k-NN 0,7000 (acaso 0,2551)
 python src/baseline.py --experiencia ambos     # teto (100%) e L-só (5%)
-python src/al.py --seeds 0 1 2                 # 6 estratégias × 15 pontos = 18 corridas
+python src/al.py --seeds 0 1 2 --saida runs/al_porclasse
+python scripts/comparar_backbones.py   # tabelas + figura dos 3 backbones                 # 6 estratégias × 15 pontos = 18 corridas
 python src/avaliar.py --B 400                  # Tabelas 1–3 + figura com IC
 python scripts/registar_corridas.py            # reconstrói as linhas de AL no resultados.csv
 python src/redundancia.py                      # τ de quase-duplicados (eixo drone)
@@ -152,6 +153,23 @@ python src/app.py --servir                     # app Gradio (pip install gradio)
 
 Cada corrida demora ~2,5 min por estratégia em CPU (20 núcleos, 3 threads por processo);
 `src/al.py` aceita `--estrategias` e `--seeds` para correr uma de cada vez.
+
+### 7.2 Três backbones (Emenda 1 do PROTOCOLO)
+
+CNN e Transformer com *fine-tune* em cada ronda (`src/al_ft.py`); DINOv2 congelado continua em `src/al.py`.
+Requer **GPU** (torch com CUDA — numa RTX 50xx: `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128`).
+
+```bash
+python src/al_ft.py --backbone cnn --rapido                # teste de fumo (~3 min em CPU)
+python src/al_ft.py --backbone cnn --teto --seeds 0 1 2    # teto 100% por backbone
+python src/al_ft.py --backbone vit --teto --seeds 0 1 2
+python src/al_ft.py --backbone cnn --seeds 0 1 2           # 6 estratégias × 15 rondas
+python src/al_ft.py --backbone vit --seeds 0 1 2
+python src/al.py --seeds 0 1 2                             # DINOv2 congelado, L por classe
+```
+
+Saídas: `runs/al_ft/<backbone>/<estrategia>/seed<s>/` (mesmo formato que `runs/al/`) e `runs/baseline_ft/<backbone>/`.
+A 1.ª execução cria `runs/cache_img224.npy` (≈1,1 GB, fora do git).
 
 ## 7.1 Resultados das primeiras corridas
 

@@ -1,0 +1,28 @@
+{
+  "estrategia": "coreset",
+  "seed": 2,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "dedup_grupo": false,
+  "estratificacao": "por_classe",
+  "final": {
+    "estrategia": "coreset",
+    "seed": 2,
+    "ronda": 14,
+    "n_rotulos": 2566,
+    "fracao": 0.3986,
+    "f1_val": 0.7974,
+    "f1_teste": 0.8241,
+    "ece": 0.0449,
+    "n_candidatos": 3872,
+    "hash_rotulado": "06d80473e3086dd1",
+    "segundos": 4.0,
+    "f1_Background": 0.9017,
+    "f1_CorrosionStain": 0.7591,
+    "f1_Crack": 0.7988,
+    "f1_Efflorescence": 0.7681,
+    "f1_ExposedBars": 0.8926,
+    "f1_Spallation": 0.8243
+  }
+}

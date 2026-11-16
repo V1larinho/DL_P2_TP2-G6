@@ -83,3 +83,10 @@ artigo original:
 - Settles, *Active Learning Literature Survey*, 2009.
 - Munjal et al., *Towards Robust and Reproducible Active Learning Using Neural Networks*, 2022.
 - Jaziri et al., *SegCODEBRIM*, WACV 2024 (extensão opcional).
+
+## 2026-11-15/16 — Emenda 1: 3 backbones (Claude Code)
+
+- Pedido do professor: CNN, Transformer e DINOv2 "normal" (no fim), mesmas estratégias de AL nos três, L = 5% por classe.
+- Gerado com IA e revisto: `src/backbones.py`, `src/al_ft.py`, `scripts/afinar_ft.py`, `scripts/comparar_backbones.py`; alterados `src/dados.py`, `src/al.py`, `src/avaliar.py`, `PROTOCOLO.md` (Emenda 1), docs e seminário.
+- Corridas reais na GPU (54 + tetos); números em `docs/RESULTADOS.md` saídos dos scripts.
+- Erro apanhado: um resumo rápido intermédio leu `f1_val` em vez de `f1_teste`; os números finais vêm de `avaliar.py` (teste).

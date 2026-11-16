@@ -127,4 +127,18 @@ hiperparametros:                      # congelados na validação com a aleatór
 
 ## 8. Emendas
 
-*(nenhuma — o protocolo está fechado nesta versão)*
+### Emenda 1 (nov/2026) — três backbones e `L` estratificado por classe
+
+**Motivo (feedback do docente):** com DINOv2 congelado a cabeça linear atinge F1 ≈ 0,75 logo com 5% dos rótulos; a curva é quase plana e o ganho marginal do AL é pequeno ("muito eficiente"). Pedido: comparar as mesmas estratégias de AL em **três backbones — CNN, Transformer e DINOv2 (este no fim)** — e estratificar `L` **por classe**.
+
+| Campo | Antes | Depois |
+|---|---|---|
+| Backbone | DINOv2 ViT-S/14 congelado | fator experimental com 3 níveis: **CNN** EfficientNet-B0 (ImageNet-1k, *fine-tune*), **Transformer** ViT-S/16 (ImageNet-21k→1k, *fine-tune*), **DINOv2** ViT-S/14 congelado + cabeça linear (inalterado, apresentado em último como referência auto-supervisionada) |
+| `L` inicial | 5% do pool, estrato = classe positiva mais rara | **5% dos positivos de cada classe** (`dados.selecionar_L_por_classe`): para cada classe sorteiam-se ⌈0,05·n_pos⌉ recortes que a têm; os já escolhidos por outra classe contam para a quota. \|L\| é variável (≈ 312–319 com as seeds 0–2, ≈ 5% do pool); cada classe fica com ≥ 5% dos seus positivos |
+| Re-treino (CNN/ViT) | — | **do pré-treino em cada ronda** (sem *warm start*), **15 épocas**, AdamW + OneCycle, lr backbone **1e-3 (CNN) / 1e-4 (ViT)**, lr cabeça 1e-3, wd 1e-4, batch 32, 224 px, *flips* H/V, AMP em GPU (`backbones.HIPER_FT`). Escolhidos por grelha na **validação** com L aleatório (L inicial 5% por classe e L=20%; seed 0; `scripts/afinar_ft.py`, `runs/afinacao_ft/`): CNN lr ∈ {1e-4, 3e-4, 1e-3}, ViT lr ∈ {2e-5, 5e-5, 1e-4}, épocas ∈ {8, 15}. F1 val do escolhido: CNN 0,751 → 0,841, ViT 0,765 → 0,859 (5% → 20%). Nota: o melhor lr ficou no limite superior da grelha nos dois casos, com margem ≤ 0,01 sobre o seguinte |
+| Estratégias | 6 | as **mesmas 6 funções** (`al.pontuar`/`al.escolher`) nos 3 backbones; em CNN/ViT operam sobre h(x) penúltimo do modelo afinado nessa ronda e a sua cabeça (BALD: dropout 0,2 na cabeça) |
+| Teto | 100% do pool, cabeça linear | 100% do pool **por backbone** (`al_ft.py --teto`), para normalizar o ALC entre backbones |
+| Comparação entre backbones | — | ALC normalizado pelo teto do próprio backbone e ganho de cada estratégia sobre a aleatória **dentro** do backbone; nunca F1 absoluto entre backbones como prova de AL |
+| Corridas | 6 × 3 seeds | 3 backbones × 6 estratégias × 3 seeds = **54 corridas** × 15 pontos |
+
+Hiperparâmetros de *fine-tune* fixados na validação com a estratégia aleatória e congelados, como em §2. Resultados das corridas DINOv2 anteriores à emenda (estrato "mais rara") ficam como estão; as novas usam `--estratificacao por_classe` (por defeito) e são registadas em separado.

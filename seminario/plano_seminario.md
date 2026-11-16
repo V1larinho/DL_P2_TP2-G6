@@ -22,21 +22,23 @@
 
 ### Bloco 3 — Método (7 min) · A3 apresenta; A2, A5 prontos a responder
 
-- Extrator: DINOv2 ViT-S/14 congelado, embedding CLS normalizado (384-d)
-- Cabeça: linear, BCE por classe, sigmoid por classe independente
-- Ciclo AL: pool → estratégia de aquisição → K recortes → oráculo revela rótulos → re-treinar cabeça
+- Três backbones, **as mesmas 6 estratégias nos três** (pedido do professor):
+  - CNN: EfficientNet-B0 (ImageNet-1k), *fine-tune*
+  - Transformer: ViT-S/16 (ImageNet-21k→1k), *fine-tune*
+  - DINOv2 ViT-S/14 congelado + cabeça linear — **no fim**, é a referência "muito eficiente"
+- No *fine-tune*, em cada ronda: re-treinar do pré-treino com o L atual → extrair h(x) → a mesma cabeça e o mesmo código de aquisição do caso congelado
 - Estratégias: aleatória (baseline) · entropia/margem · BALD (MC Dropout T=10) · CoreSet (k-center greedy) · BADGE (gradiente + k-means++)
-- Protocolo: L=5%, K=2,5%, 14 rondas, 3 seeds, hiperparâmetros congelados na aleatória
-- **Mostrar:** a figura `paper/figuras/curva_al.png`
+- Protocolo: L = 5% **por classe**, K=2,5%, 14 rondas, 3 seeds → 54 corridas; hiperparâmetros afinados na validação com a aleatória
+- **Mostrar:** `paper/figuras/curvas_3_backbones.png`
 
 ### Bloco 4 — Resultados (4 min) · A5 suporta
 
-- Teto: Macro-F1 0,8306 · L-só: 0,7665 · k-NN sanidade: 0,7000 (acaso 0,2551)
-- Tabela 1: BALD ALC 0,8162 [0,7801; 0,8474] · H1 confirmada (4 estratégias batem aleatória com IC que exclui zero)
-- H2 parcial: corrosão +0,057 (IC exclui 0); eflorescência +0,055 (IC inclui 0 — só 27 positivos em L)
-- H3 refutada: CoreSet não bate aleatória (diversidade pura falha com embeddings fortes)
-- H4 não confirmada: calibração similar entre estratégias ativas e aleatória
-- **Dizer:** os IC sobrepõem-se todos na Tabela 1 — só a diferença emparelhada (Tabela 2) isola o efeito
+- Tetos: CNN 0,866 · ViT 0,888 · DINOv2 0,831
+- H1 confirmada nos 3: CNN 5/5 estratégias batem a aleatória (+0,018 a +0,021 ALC), ViT 5/5 (+0,010 a +0,017), DINOv2 3/5 (BALD, entropia, margem)
+- Rótulos para 95% do teto: aleatória 18% / 14% / 15% → melhor AL 12% / 10% / 11%
+- CoreSet muda de sinal: bom com *fine-tune*, igual à aleatória com DINOv2 congelado
+- H2 parcial: eflorescência ganha de forma significativa só na CNN
+- **Dizer:** o *fine-tune* torna a curva mais inclinada e é aí que o AL tem espaço; com DINOv2 já se começa perto do teto
 
 ### Bloco 5 — Aplicação (3 min) · A4 suporta
 
@@ -48,9 +50,9 @@
 
 ### Bloco 6 — Conclusão e próximos passos (3 min) · A3
 
-- O AL funciona neste regime, mas o efeito é modesto (+0,013 a +0,022 ALC)
+- O AL funciona nos 3 backbones; o efeito é consistente (+0,01 a +0,02 ALC) e poupa cerca de ⅓ dos rótulos para chegar a 95% do teto
 - Vale a pena quando: classes raras são críticas; orçamento é muito limitado (<10%)
-- Próximos passos: EfficientNet afinada (confirmação); campanha de anotação real; SegCODEBRIM
+- Próximos passos: mais seeds; campanha de anotação real; SegCODEBRIM
 - **Fechar com:** "Se a aleatória ganhar, o resultado é esse — com análise do porquê. Já acontece na literatura."
 
 ---
@@ -68,5 +70,7 @@
 1. Porque é que a comparação justa para AL é a aleatória com o mesmo orçamento, e não "uma CNN simples"?
 2. O bootstrap é por recorte ou por imagem, e por quê?
 3. Se o BALD ganha apenas +0,022 de ALC, isso justifica a complexidade adicional?
-4. Porque é que o CoreSet (diversidade pura) falha com embeddings de DINOv2?
+4. Porque é que o CoreSet funciona com *fine-tune* mas falha com embeddings DINOv2 congelados?
+6. Porque re-treinar do pré-treino em cada ronda em vez de continuar o treino anterior?
+7. Como se comparam backbones com tetos diferentes (ALC normalizado pelo teto do próprio backbone)?
 5. Como é que a ECE multi-rótulo é calculada aqui (marginal por classe)?

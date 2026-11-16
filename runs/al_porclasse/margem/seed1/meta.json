@@ -1,0 +1,28 @@
+{
+  "estrategia": "margem",
+  "seed": 1,
+  "rondas": 14,
+  "K": 161,
+  "n_pool": 6438,
+  "dedup_grupo": false,
+  "estratificacao": "por_classe",
+  "final": {
+    "estrategia": "margem",
+    "seed": 1,
+    "ronda": 14,
+    "n_rotulos": 2569,
+    "fracao": 0.399,
+    "f1_val": 0.8021,
+    "f1_teste": 0.8293,
+    "ece": 0.041,
+    "n_candidatos": 3869,
+    "hash_rotulado": "55d8620678f61e72",
+    "segundos": 3.7,
+    "f1_Background": 0.8986,
+    "f1_CorrosionStain": 0.7537,
+    "f1_Crack": 0.8377,
+    "f1_Efflorescence": 0.7918,
+    "f1_ExposedBars": 0.8762,
+    "f1_Spallation": 0.8179
+  }
+}
